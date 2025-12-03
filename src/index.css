@@ -14,7 +14,7 @@
   /* Font sizes */
   --text-h1: clamp(1.6rem, 4vw, 2.2rem);
   --text-h2: clamp(1.3rem, 3.4vw, 1.9rem);
-  --text-h3: clamp(1.5rem, 3.5vw, 2.25rem);
+  --text-h3: clamp(1.3rem, 3.5vw, 1.5rem);
   --text-p: clamp(0.95rem, 2.6vw, 1.1rem);
 }
 
