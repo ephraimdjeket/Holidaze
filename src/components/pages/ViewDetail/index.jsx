@@ -26,23 +26,27 @@ const ViewDetail = () => {
       </div>
       <div>
       </div>
-      <div className="max-w-7xl mx-auto px-4">
-        <div className="grid grid-cols-2 justify-between w-full">
-          <div className="flex flex-wrap flex-col md:flex-row gap-10 my-10  justify-center items-center md:justify-start md:items-start">
-            <img className="w-40 border rounded-xl cursor-pointer" src="https://blocks.astratic.com/img/general-img-landscape.png" alt="placeholder" />
-            <img className="w-40 border rounded-xl cursor-pointer" src="https://blocks.astratic.com/img/general-img-landscape.png" alt="placeholder" />
-            <img className="w-40 border rounded-xl cursor-pointer" src="https://blocks.astratic.com/img/general-img-landscape.png" alt="placeholder" />
-          </div>
+      <div className="mx-auto max-w-7xl px-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 mx-auto justify-center items-start">
+          <div className="grid grid-cols-1">
+            <div className="flex flex-wrap flex-col md:flex-row gap-10 my-10  justify-center items-center md:justify-start md:items-start">
+              <img className="w-40 border rounded-xl cursor-pointer" src="https://blocks.astratic.com/img/general-img-landscape.png" alt="placeholder" />
+              <img className="w-40 border rounded-xl cursor-pointer" src="https://blocks.astratic.com/img/general-img-landscape.png" alt="placeholder" />
+              <img className="w-40 border rounded-xl cursor-pointer" src="https://blocks.astratic.com/img/general-img-landscape.png" alt="placeholder" />
+            </div>
+            <div>
+              <div>
+                <h2 className="text-h2 font-poppins">Description</h2>
+                <p className="text-p font-rubik">"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."</p>
+              </div>
+            </div>
+          </div >
           <div className="">
             <h3 className="text-h3 font-poppins">Book this venue</h3>
             <form action=""></form>
           </div>
-          <div>
-            <h2 className="text-h2 font-poppins">Description</h2>
-            <p className="text-p font-rubik">"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."</p>
-          </div>
         </div>
-      </div >
+      </div>
     </div>
   )
 }
