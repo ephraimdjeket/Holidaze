@@ -25,29 +25,77 @@ const ViewDetail = () => {
         </div>
       </div>
       <div>
-      </div>
-      <div className="mx-auto max-w-7xl px-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 mx-auto justify-center items-start">
-          <div className="grid grid-cols-1">
-            <div className="flex flex-wrap flex-col md:flex-row gap-10 my-10  justify-center items-center md:justify-start md:items-start">
-              <img className="w-40 border rounded-xl cursor-pointer" src="https://blocks.astratic.com/img/general-img-landscape.png" alt="placeholder" />
-              <img className="w-40 border rounded-xl cursor-pointer" src="https://blocks.astratic.com/img/general-img-landscape.png" alt="placeholder" />
-              <img className="w-40 border rounded-xl cursor-pointer" src="https://blocks.astratic.com/img/general-img-landscape.png" alt="placeholder" />
-            </div>
-            <div>
-              <div>
+        <div className="mx-auto max-w-7xl px-4 mb-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-0 md:gap-10 mx-10">
+            <div className="flex flex-col justify-between">
+              <div className="flex flex-wrap flex-col md:flex-row gap-10 my-10  justify-center items-center md:justify-start md:items-start">
+                <img className="w-40 border rounded-xl cursor-pointer" src="https://blocks.astratic.com/img/general-img-landscape.png" alt="placeholder" />
+                <img className="w-40 border rounded-xl cursor-pointer" src="https://blocks.astratic.com/img/general-img-landscape.png" alt="placeholder" />
+                <img className="w-40 border rounded-xl cursor-pointer" src="https://blocks.astratic.com/img/general-img-landscape.png" alt="placeholder" />
+              </div>
+
+              <div className="bg-primary-blue text-white p-8 rounded-xl">
                 <h2 className="text-h2 font-poppins">Description</h2>
-                <p className="text-p font-rubik">"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."</p>
+                <p className="text-p font-rubik">
+                  "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt"
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2  lg:grid-cols-4 gap-5 my-5">
+                  <div className="flex gap-2">
+                    <input className="cursor-pointer w-4" type="checkbox"
+                      name="test" />
+                    <label htmlFor="wifi">Wifi</label>
+                  </div>
+                  <div className="flex gap-2">
+                    <input className="cursor-pointer w-4" type="checkbox"
+                      name="test" />
+                    <label htmlFor="pets">Pets</label>
+                  </div>
+                  <div className="flex gap-2">
+                    <input className="cursor-pointer w-4" type="checkbox"
+                      name="test" />
+                    <label htmlFor="breakfast">Breakfast</label>
+                  </div>
+                  <div className="flex gap-2">
+                    <input className="cursor-pointer w-4" type="checkbox"
+                      name="test" />
+                    <label htmlFor="parking">Parking</label>
+                  </div>
+                </div>
+                <div className="flex items-center gap-5">
+                  <img className="w-15 h-15 rounded-full object-cover" src="https://blocks.astratic.com/img/general-img-landscape.png" alt="test" />
+                  <h3>Owner</h3>
+                </div>
+
               </div>
             </div>
-          </div >
-          <div className="">
-            <h3 className="text-h3 font-poppins">Book this venue</h3>
-            <form action=""></form>
+
+            <div className="bg-primary-blue text-white p-8 rounded-xl w-full md:max-w-96 md:ml-auto mt-10 md:px-10">
+              <h2 className="text-h2 font-poppins text-center">Book this venue</h2>
+              <form className="w-full flex flex-col justify-center items-center" action="#">
+                <div className="form-group my-3 w-full max-w-72 flex flex-col gap-2">
+                  <label className="text-p font-rubik" htmlFor="checkIn">Check-in:</label>
+                  <input className="bg-white text-black w-full max-w-72 h-8 rounded-xl px-3 cursor-pointer" id="checkIn" type="date" />
+                </div>
+                <div className="form-group my-3 w-full max-w-72 flex flex-col gap-2">
+                  <label className="text-p font-rubik" htmlFor="checkOut">Check-out:</label>
+                  <input className="bg-white text-black w-full max-w-72 h-8 rounded-xl px-3 cursor-pointer" id="checkOut" type="date" />
+                </div>
+                <div className="form-group my-3 w-full max-w-72 flex flex-col gap-2">
+                  <label className="text-p font-rubik" htmlFor="amountOfGuests">Number of guests:</label>
+                  <input className="bg-white text-black w-full max-w-72 h-8 rounded-xl px-3 cursor-pointer" id="amountOfGuests" type="number" />
+                </div>
+                <div className="text-center my-3">
+                  <p className="text-p font-rubik"><span>0</span> Nights</p>
+                  <p className="text-p font-rubik">Total Price: <span>$200</span></p>
+                </div>
+                <button className="cursor-pointer bg-green-700  h-10 text-white mx-10 w-full rounded-xl max-w-48 font-poppins text-p hover:bg-green-600 transition-colors" type="submit">Book now</button>
+              </form>
+            </div>
           </div>
         </div>
       </div>
     </div>
+
   )
 }
 
