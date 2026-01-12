@@ -2,15 +2,12 @@ import { Link } from "react-router-dom";
 import logo from "../../../assets/Holidaze-logo.png"
 import { useState } from "react";
 
-const Header = () => {
+const Header = ({ viewImage, setViewImage }) => {
   const [open, setOpen] = useState(false);
   return (
-    <header className="w-full py-5 border-b fixed z-50 bg-white px-10">
+    <header className={`w-full py-5 border-b fixed z-50 bg-white px-10 ${viewImage ? "blur-sm" : setViewImage(false)}`}>
       <nav className="flex justify-between  max-w-7xl mx-auto">
-        <div className="flex gap-2 items-center">
-          <img src={logo} alt="Holidaze logo" className=" w-8" />
-          <h1 className="font-poppins text-primary-blue text-h1 hidden md:block"><a href="#">Holidaze</a></h1>
-        </div>
+        <Link className="flex gap-2 items-center" to="/home"><img src={logo} alt="Holidaze logo" className="w-8 h-8" /> <h1 className="font-poppins text-primary-blue text-h1 hidden md:block"><a href="#">Holidaze</a></h1></Link>
 
         <svg onClick={() => setOpen(prev => !prev)} className="w-6 cursor-pointer md:hidden" fill="#000000" viewBox="0 0 1920 1920" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M1920 1411.412v225.882H0v-225.882h1920Zm0-564.706v225.882H0V846.706h1920ZM1920 282v225.882H0V282h1920Z" fill-rule="evenodd"></path> </g></svg>
 
