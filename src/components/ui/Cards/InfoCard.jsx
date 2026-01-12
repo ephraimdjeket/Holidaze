@@ -1,37 +1,60 @@
-const InfoCard = () => {
+const InfoCard = ({ booking }) => {
+  const venue = booking.venue;
+
+  const nights =
+    (new Date(booking.dateTo) - new Date(booking.dateFrom)) /
+    (1000 * 60 * 60 * 24);
+
+  const totalPrice = nights * venue.price;
+
   return (
     <article className="w-full bg-light-grey rounded-xl border my-8">
       <div className="flex flex-col md:flex-row md:rounded-xl">
-        <img className="w-full md:max-w-md md:rounded-l-xl md:rounded-t-none rounded-t-xl" src="https://plus.unsplash.com/premium_photo-1693227521269-d90b70e3ee06?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8dGVzdHxlbnwwfHwwfHx8MA%3D%3D" alt="" />
-        <div className="flex justify-between items-center w-full">
-          <div className="w-full px-10 item md:my-0 my-5">
-            <h2 className="text-h2 font-poppins">Card title</h2>
-            <div className="flex items-center justify-between">
-              <div className="flex my-2"><svg className="w-5" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path fill-rule="evenodd" clip-rule="evenodd" d="M3.37892 10.2236L8 16L12.6211 10.2236C13.5137 9.10788 14 7.72154 14 6.29266V6C14 2.68629 11.3137 0 8 0C4.68629 0 2 2.68629 2 6V6.29266C2 7.72154 2.4863 9.10788 3.37892 10.2236ZM8 8C9.10457 8 10 7.10457 10 6C10 4.89543 9.10457 4 8 4C6.89543 4 6 4.89543 6 6C6 7.10457 6.89543 8 8 8Z" fill="#0935B7"></path> </g></svg> <h2 className="font-rubik text-h3">Country, city</h2></div>
-              <span><span className="flex items-center font-bold text-h3"><svg className="w-7" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M9.15316 5.40838C10.4198 3.13613 11.0531 2 12 2C12.9469 2 13.5802 3.13612 14.8468 5.40837L15.1745 5.99623C15.5345 6.64193 15.7144 6.96479 15.9951 7.17781C16.2757 7.39083 16.6251 7.4699 17.3241 7.62805L17.9605 7.77203C20.4201 8.32856 21.65 8.60682 21.9426 9.54773C22.2352 10.4886 21.3968 11.4691 19.7199 13.4299L19.2861 13.9372C18.8096 14.4944 18.5713 14.773 18.4641 15.1177C18.357 15.4624 18.393 15.8341 18.465 16.5776L18.5306 17.2544C18.7841 19.8706 18.9109 21.1787 18.1449 21.7602C17.3788 22.3417 16.2273 21.8115 13.9243 20.7512L13.3285 20.4768C12.6741 20.1755 12.3469 20.0248 12 20.0248C11.6531 20.0248 11.3259 20.1755 10.6715 20.4768L10.0757 20.7512C7.77268 21.8115 6.62118 22.3417 5.85515 21.7602C5.08912 21.1787 5.21588 19.8706 5.4694 17.2544L5.53498 16.5776C5.60703 15.8341 5.64305 15.4624 5.53586 15.1177C5.42868 14.773 5.19043 14.4944 4.71392 13.9372L4.2801 13.4299C2.60325 11.4691 1.76482 10.4886 2.05742 9.54773C2.35002 8.60682 3.57986 8.32856 6.03954 7.77203L6.67589 7.62805C7.37485 7.4699 7.72433 7.39083 8.00494 7.17781C8.28555 6.96479 8.46553 6.64194 8.82547 5.99623L9.15316 5.40838Z" fill="#fff700"></path> </g></svg>3</span></span>
-            </div>
-            <span className="font-rubik text-xl"> $212/night</span>
-            <div className="flex justify-between mt-10 align-middle">
-              <h3 className="text-rubik text-p">Check-in:</h3>
-              <h3 className="text-rubik text-p font-bold">12th Nov 2025</h3>
-            </div>
-            <div className="flex justify-between">
-              <h3 className="text-rubik text-p">Check-out:</h3>
-              <h3 className="text-rubik text-p font-bold">18th Nov 2025</h3>
-            </div>
-            <div className="flex justify-between">
-              <h3 className="text-rubik text-p">Nights:</h3>
-              <h3 className="text-rubik text-p font-bold">6</h3>
-            </div>
-            <div className="flex justify-between">
-              <h3 className="text-rubik text-p">Total:</h3>
-              <h3 className="text-rubik text-p font-bold">$1 272</h3>
-            </div>
+        <img
+          className="w-full md:max-w-md md:rounded-l-xl rounded-t-xl md:rounded-t-none"
+          src={venue.media?.[0]?.url}
+          alt={venue.media?.[0]?.alt || venue.name}
+        />
+
+        <div className="w-full px-10 my-5">
+          <h2 className="text-h2 font-poppins">{venue.name}</h2>
+
+          <p className="font-rubik text-h3 my-2">
+            {venue.location?.city}, {venue.location?.country}
+          </p>
+
+          <span className="font-rubik text-xl block mb-4">
+            ${venue.price}/night
+          </span>
+
+          <div className="flex justify-between">
+            <span>Check-in:</span>
+            <strong>
+              {new Date(booking.dateFrom).toLocaleDateString()}
+            </strong>
+          </div>
+
+          <div className="flex justify-between">
+            <span>Check-out:</span>
+            <strong>
+              {new Date(booking.dateTo).toLocaleDateString()}
+            </strong>
+          </div>
+
+          <div className="flex justify-between">
+            <span>Nights:</span>
+            <strong>{nights}</strong>
+          </div>
+
+          <div className="flex justify-between mt-2">
+            <span>Total:</span>
+            <strong>${totalPrice}</strong>
           </div>
         </div>
       </div>
     </article>
-  )
-}
+  );
+};
 
 export default InfoCard;
+``
