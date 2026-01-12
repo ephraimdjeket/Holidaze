@@ -1,101 +1,295 @@
-const ViewDetail = () => {
+import { API_BASE, HOLIDAZE_VENUES, CREATE_BOOKING } from "../../../api/config.mjs";
+import { useParams, Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+const ViewDetail = ({ viewImage, setViewImage }) => {
+  const [detailVenue, setDetailVenue] = useState({});
+  const [currentImage, setCurrentImage] = useState("");
+  const [checkInDate, setCheckInDate] = useState("");
+  const [checkOutDate, setCheckOutDate] = useState("");
+  const [numberOfGuests, setNumberOfGuests] = useState("");
+  const [amountOfNights, setAmountOfNights] = useState(null);
+  const [booking, setBooking] = useState(false);
+
+  const [errors, setErrors] = useState({});
+  const [catchError, setCatchError] = useState("");
+  const [catchErrorCheck, setCatchErrorCheck] = useState(false);
+
+  let { id } = useParams();
+
+  useEffect(() => {
+    async function fetchVenues() {
+      try {
+        const res = await fetch(`${API_BASE}${HOLIDAZE_VENUES}/${id}`);
+        const data = await res.json();
+        if (res.ok) {
+          setDetailVenue(data.data);
+        }
+      } catch (error) {
+        setCatchErrorCheck(true);
+        setCatchError(error.message);
+      } finally {
+        console.log("done");
+      }
+    }
+    fetchVenues();
+  }, [id]);
+
+  async function bookNow(e) {
+    e.preventDefault();
+
+    setErrors({});
+    setCatchError("");
+    setCatchErrorCheck(false);
+
+    const errorData = {};
+
+    if (!checkInDate) errorData.checkIn = "Check-in date is required";
+    if (!checkOutDate) errorData.checkOut = "Check-out date is required";
+    if (!numberOfGuests || numberOfGuests < 1) {
+      errorData.guests = "At least 1 guest is required";
+    }
+    if (!amountOfNights || amountOfNights <= 0) {
+      errorData.dates = "Check-out must be after check-in";
+    }
+
+    if (Object.keys(errorData).length > 0) {
+      setErrors(errorData);
+      return;
+    }
+
+    const token = localStorage.getItem("token");
+
+    const bookingData = {
+      dateFrom: checkInDate,
+      dateTo: checkOutDate,
+      guests: Number(numberOfGuests),
+      venueId: id,
+    };
+  }
+
+  useEffect(() => {
+    if (!checkInDate || !checkOutDate) return;
+
+    const checkIn = new Date(checkInDate);
+    const checkOut = new Date(checkOutDate);
+    const diffTime = checkOut - checkIn;
+    const diffDays = diffTime / (1000 * 60 * 60 * 24);
+
+    setAmountOfNights(diffDays > 0 ? diffDays : 0);
+  }, [checkInDate, checkOutDate]);
+
+  useEffect(() => {
+    document.body.style.overflow = viewImage ? "hidden" : "auto";
+  }, [viewImage]);
+
+  async function bookNow(e) {
+    e.preventDefault();
+
+    setErrors({});
+    setCatchError("");
+    setCatchErrorCheck(false);
+
+    const errorData = {};
+
+    if (!checkInDate) errorData.checkIn = "Check-in date is required";
+    if (!checkOutDate) errorData.checkOut = "Check-out date is required";
+    if (!numberOfGuests || numberOfGuests < 1) errorData.guests = "At least 1 guest is required";
+    if (!amountOfNights || amountOfNights <= 0) errorData.dates = "Check-out must be after check-in";
+
+    if (Object.keys(errorData).length > 0) {
+      setErrors(errorData);
+      return;
+    }
+
+    const token = localStorage.getItem("accessToken");
+    const apiKey = localStorage.getItem("apiKey");
+
+    const bookingData = {
+      dateFrom: checkInDate,
+      dateTo: checkOutDate,
+      guests: Number(numberOfGuests),
+      venueId: id,
+    };
+
+    try {
+
+      const res = await fetch(`${API_BASE}${CREATE_BOOKING}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+          "X-Noroff-API-Key": apiKey,
+        },
+        body: JSON.stringify(bookingData),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        const apiErrors = {};
+        data.errors?.forEach(error => {
+          apiErrors.general = error.message;
+        });
+        setErrors(apiErrors);
+        return;
+      }
+
+      setBooking(true);
+    } catch (error) {
+      setCatchErrorCheck(true);
+      setCatchError(error.message);
+    }
+  };
+
   return (
-    <div>
-      <div className="relative w-full h-[40vh] md:h-[45vh] max-w-7xl mx-auto rounded-xl">
-        <img className="absolute inset-0 h-full w-full object-cover" src="https://www.civitatis.com/blog/wp-content/uploads/2024/01/shutterstock_590390942-1280x853.jpg" alt="placeholder" />
-        <div className="absolute bg-black/50 h-full w-full">
-          <div className="absolute bottom-0 text-white">
-            <div className="ml-10 mb-5">
-              <p className="flex items-center text-p font-rubik mb-20">
-                <svg className="w-8" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M14.2893 5.70708C13.8988 5.31655 13.2657 5.31655 12.8751 5.70708L7.98768 10.5993C7.20729 11.3805 7.2076 12.6463 7.98837 13.427L12.8787 18.3174C13.2693 18.7079 13.9024 18.7079 14.293 18.3174C14.6835 17.9269 14.6835 17.2937 14.293 16.9032L10.1073 12.7175C9.71678 12.327 9.71678 11.6939 10.1073 11.3033L14.2893 7.12129C14.6799 6.73077 14.6799 6.0976 14.2893 5.70708Z" fill="#FFF"></path> </g></svg>Back</p>
-              <div className="flex flex-col gap-2">
-                <h1 className="text-h1 font-poppins">Title here</h1>
-                <div className="grid grid-cols-1">
-                  <div className="grid grid-cols-1 gap-0  md:grid-cols-2 items-start md:gap-20">
-                    <p className="flex items-center text-h3 font-rubik"><svg className="w-8" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path fill-rule="evenodd" clip-rule="evenodd" d="M3.37892 10.2236L8 16L12.6211 10.2236C13.5137 9.10788 14 7.72154 14 6.29266V6C14 2.68629 11.3137 0 8 0C4.68629 0 2 2.68629 2 6V6.29266C2 7.72154 2.4863 9.10788 3.37892 10.2236ZM8 8C9.10457 8 10 7.10457 10 6C10 4.89543 9.10457 4 8 4C6.89543 4 6 4.89543 6 6C6 7.10457 6.89543 8 8 8Z" fill="#0935B7"></path> </g></svg>Country, city</p>
-                    <p className="flex items-center text-h3 font-poppins"><svg className="w-7" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M9.15316 5.40838C10.4198 3.13613 11.0531 2 12 2C12.9469 2 13.5802 3.13612 14.8468 5.40837L15.1745 5.99623C15.5345 6.64193 15.7144 6.96479 15.9951 7.17781C16.2757 7.39083 16.6251 7.4699 17.3241 7.62805L17.9605 7.77203C20.4201 8.32856 21.65 8.60682 21.9426 9.54773C22.2352 10.4886 21.3968 11.4691 19.7199 13.4299L19.2861 13.9372C18.8096 14.4944 18.5713 14.773 18.4641 15.1177C18.357 15.4624 18.393 15.8341 18.465 16.5776L18.5306 17.2544C18.7841 19.8706 18.9109 21.1787 18.1449 21.7602C17.3788 22.3417 16.2273 21.8115 13.9243 20.7512L13.3285 20.4768C12.6741 20.1755 12.3469 20.0248 12 20.0248C11.6531 20.0248 11.3259 20.1755 10.6715 20.4768L10.0757 20.7512C7.77268 21.8115 6.62118 22.3417 5.85515 21.7602C5.08912 21.1787 5.21588 19.8706 5.4694 17.2544L5.53498 16.5776C5.60703 15.8341 5.64305 15.4624 5.53586 15.1177C5.42868 14.773 5.19043 14.4944 4.71392 13.9372L4.2801 13.4299C2.60325 11.4691 1.76482 10.4886 2.05742 9.54773C2.35002 8.60682 3.57986 8.32856 6.03954 7.77203L6.67589 7.62805C7.37485 7.4699 7.72433 7.39083 8.00494 7.17781C8.28555 6.96479 8.46553 6.64194 8.82547 5.99623L9.15316 5.40838Z" fill="#fff700"></path> </g></svg>3</p></div>
-                  <div className="grid grid-cols-1 gap-0  md:grid-cols-2 items-start md:gap-20">
-                    <p className="flex items-center text-h3 font-rubik"><svg className="w-14" fill="#0935B7" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M20.906 20.75c1.313 0.719 2.063 2 1.969 3.281-0.063 0.781-0.094 0.813-1.094 0.938-0.625 0.094-4.563 0.125-8.625 0.125-4.594 0-9.406-0.094-9.75-0.188-1.375-0.344-0.625-2.844 1.188-4.031 1.406-0.906 4.281-2.281 5.063-2.438 1.063-0.219 1.188-0.875 0-3-0.281-0.469-0.594-1.906-0.625-3.406-0.031-2.438 0.438-4.094 2.563-4.906 0.438-0.156 0.875-0.219 1.281-0.219 1.406 0 2.719 0.781 3.25 1.938 0.781 1.531 0.469 5.625-0.344 7.094-0.938 1.656-0.844 2.188 0.188 2.469 0.688 0.188 2.813 1.188 4.938 2.344zM3.906 19.813c-0.5 0.344-0.969 0.781-1.344 1.219-1.188 0-2.094-0.031-2.188-0.063-0.781-0.188-0.344-1.625 0.688-2.25 0.781-0.5 2.375-1.281 2.813-1.375 0.563-0.125 0.688-0.469 0-1.656-0.156-0.25-0.344-1.063-0.344-1.906-0.031-1.375 0.25-2.313 1.438-2.719 1-0.375 2.125 0.094 2.531 0.938 0.406 0.875 0.188 3.125-0.25 3.938-0.5 0.969-0.406 1.219 0.156 1.375 0.125 0.031 0.375 0.156 0.719 0.313-1.375 0.563-3.25 1.594-4.219 2.188zM24.469 18.625c0.75 0.406 1.156 1.094 1.094 1.813-0.031 0.438-0.031 0.469-0.594 0.531-0.156 0.031-0.875 0.063-1.813 0.063-0.406-0.531-0.969-1.031-1.656-1.375-1.281-0.75-2.844-1.563-4-2.063 0.313-0.125 0.594-0.219 0.719-0.25 0.594-0.125 0.688-0.469 0-1.656-0.125-0.25-0.344-1.063-0.344-1.906-0.031-1.375 0.219-2.313 1.406-2.719 1.031-0.375 2.156 0.094 2.531 0.938 0.406 0.875 0.25 3.125-0.188 3.938-0.5 0.969-0.438 1.219 0.094 1.375 0.375 0.125 1.563 0.688 2.75 1.313z"></path> </g></svg>Up to 4 guests</p>
-                    <p className="flex items-center text-h3 font-rubik"><svg className="w-14" fill="#0935B7" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M20.906 20.75c1.313 0.719 2.063 2 1.969 3.281-0.063 0.781-0.094 0.813-1.094 0.938-0.625 0.094-4.563 0.125-8.625 0.125-4.594 0-9.406-0.094-9.75-0.188-1.375-0.344-0.625-2.844 1.188-4.031 1.406-0.906 4.281-2.281 5.063-2.438 1.063-0.219 1.188-0.875 0-3-0.281-0.469-0.594-1.906-0.625-3.406-0.031-2.438 0.438-4.094 2.563-4.906 0.438-0.156 0.875-0.219 1.281-0.219 1.406 0 2.719 0.781 3.25 1.938 0.781 1.531 0.469 5.625-0.344 7.094-0.938 1.656-0.844 2.188 0.188 2.469 0.688 0.188 2.813 1.188 4.938 2.344zM3.906 19.813c-0.5 0.344-0.969 0.781-1.344 1.219-1.188 0-2.094-0.031-2.188-0.063-0.781-0.188-0.344-1.625 0.688-2.25 0.781-0.5 2.375-1.281 2.813-1.375 0.563-0.125 0.688-0.469 0-1.656-0.156-0.25-0.344-1.063-0.344-1.906-0.031-1.375 0.25-2.313 1.438-2.719 1-0.375 2.125 0.094 2.531 0.938 0.406 0.875 0.188 3.125-0.25 3.938-0.5 0.969-0.406 1.219 0.156 1.375 0.125 0.031 0.375 0.156 0.719 0.313-1.375 0.563-3.25 1.594-4.219 2.188zM24.469 18.625c0.75 0.406 1.156 1.094 1.094 1.813-0.031 0.438-0.031 0.469-0.594 0.531-0.156 0.031-0.875 0.063-1.813 0.063-0.406-0.531-0.969-1.031-1.656-1.375-1.281-0.75-2.844-1.563-4-2.063 0.313-0.125 0.594-0.219 0.719-0.25 0.594-0.125 0.688-0.469 0-1.656-0.125-0.25-0.344-1.063-0.344-1.906-0.031-1.375 0.219-2.313 1.406-2.719 1.031-0.375 2.156 0.094 2.531 0.938 0.406 0.875 0.25 3.125-0.188 3.938-0.5 0.969-0.438 1.219 0.094 1.375 0.375 0.125 1.563 0.688 2.75 1.313z"></path> </g></svg>Up to 4 guests</p>
+    <>
+      {
+        viewImage && <div onClick={() => setViewImage(false)} className="fixed flex items-center inset-0 bg-black/50 z-999 overflow-hidden h-full">
+          <img className="max-w-[70vw] max-h-[70vh] rounded-xl mx-auto" src={currentImage.url} alt={currentImage.alt} /></div>
+      }
+      <div className={`max-w-7xl mx-auto ${viewImage && "blur-sm"} `}>
+        <div className="relative w-full h-79 rounded-xl">
+          <img
+            className="absolute inset-0 h-full w-full object-cover"
+            src={detailVenue.media?.[0]?.url}
+            alt={detailVenue.media?.[0]?.alt}
+          />
+          <div className="absolute bg-black/50 h-full w-full">
+            <div className="absolute bottom-0 text-white">
+              <div className="ml-10 mb-5">
+                <Link to="/accomodations" className="flex items-center text-button font-rubik mb-5 cursor-pointer">
+                  &lt; Back </Link>
+                <div className="flex flex-col">
+                  <h1 className="text-6xl font-bold font-poppins mb-5">{detailVenue.name?.length > 10 ? detailVenue.name?.substring(0, 10) + "..." : detailVenue.name}</h1>
+                  <div className="grid grid-cols-1">
+                    <div className="grid grid-cols-1 gap-0  md:grid-cols-2 items-start md:gap-20">
+                      <p className="flex items-center text-p font-rubik gap-1">Location: <span className="font-bold"> {detailVenue?.location?.address}, {detailVenue?.location?.city}</span></p>
+                      <p className="flex items-center text-p font-poppins gap-1">Rating: <span className="font-bold">{detailVenue.rating}</span></p></div>
+                    <div className="grid grid-cols-1 gap-0  md:grid-cols-2 items-start md:gap-20">
+                      <p className="flex items-center text-p font-rubik gap-1">Price: <span className="font-bold">${detailVenue.price}</span></p>
+                      <p className="flex items-center text-p font-rubik gap-1">Max Guests: <span className="font-bold">{detailVenue.maxGuests} guests</span></p>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-      <div>
-        <div className="mx-auto max-w-7xl px-4 mb-10">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-0 md:gap-10 mx-10">
-            <div className="flex flex-col justify-between">
-              <div className="flex flex-wrap flex-col md:flex-row gap-10 my-10  justify-center items-center md:justify-start md:items-start">
-                <img className="w-40 border rounded-xl cursor-pointer" src="https://blocks.astratic.com/img/general-img-landscape.png" alt="placeholder" />
-                <img className="w-40 border rounded-xl cursor-pointer" src="https://blocks.astratic.com/img/general-img-landscape.png" alt="placeholder" />
-                <img className="w-40 border rounded-xl cursor-pointer" src="https://blocks.astratic.com/img/general-img-landscape.png" alt="placeholder" />
+        <div>
+          <div className="mx-auto px-4 xl:px-0 mb-10">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-0 md:gap-10">
+              <div className="flex flex-col justify-between">
+                <div className="flex flex-wrap flex-col md:flex-row gap-10 my-10  justify-center items-center md:justify-start md:items-start">
+                  {detailVenue.media?.map(image => {
+                    return <img key={image.url} onClick={() => {
+                      setCurrentImage(image);
+                      setViewImage(true);
+                    }} className="h-35 w-35 border rounded-xl cursor-pointer hover:scale-110 ease-out duration-500 hover:blur-none" src={image.url} alt={image.alt} />
+                  })}
+                </div>
+
+                <div className="flex flex-col justify-top bg-primary-blue text-white p-8 rounded-xl h-full">
+                  <h2 className="text-h2 font-poppins">Description</h2>
+                  <p className="text-p font-rubik">
+                    {detailVenue.description}
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2  lg:grid-cols-4 gap-5 my-5">
+                    {detailVenue?.meta?.wifi &&
+                      <div className="flex items-end gap-2">
+                        <svg className="w-6" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M0 7L1.17157 5.82843C2.98259 4.01741 5.43884 3 8 3C10.5612 3 13.0174 4.01742 14.8284 5.82843L16 7L14.5858 8.41421L13.4142 7.24264C11.9783 5.8067 10.0307 5 8 5C5.96928 5 4.02173 5.8067 2.58579 7.24264L1.41421 8.41421L0 7Z" fill="#ffffff"></path> <path d="M4.24264 11.2426L2.82843 9.82843L4 8.65685C5.06086 7.59599 6.49971 7 8 7C9.50029 7 10.9391 7.59599 12 8.65686L13.1716 9.82843L11.7574 11.2426L10.5858 10.0711C9.89999 9.38527 8.96986 9 8 9C7.03014 9 6.1 9.38527 5.41421 10.0711L4.24264 11.2426Z" fill="#ffffff"></path> <path d="M8 15L5.65685 12.6569L6.82842 11.4853C7.13914 11.1746 7.56057 11 8 11C8.43942 11 8.86085 11.1746 9.17157 11.4853L10.3431 12.6569L8 15Z" fill="#ffffff"></path> </g></svg>
+                        <small className="text-p font-rubik leading-none">Wifi</small>
+                      </div>
+                    }
+                    {detailVenue?.meta?.pets &&
+                      <div className="flex gap-2 items-end">
+                        <svg className="w-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M19.0803 15.7203C18.4903 12.1903 15.1003 9.32031 11.5203 9.32031C7.63028 9.32031 4.21028 12.4703 3.88028 16.3503C3.75028 17.8503 4.23028 19.2703 5.22028 20.3403C6.20028 21.4103 7.58028 22.0003 9.08028 22.0003H13.7603C15.4503 22.0003 16.9303 21.3403 17.9403 20.1503C18.9503 18.9603 19.3503 17.3803 19.0803 15.7203Z" fill="#ffffff"></path> <path d="M10.2796 7.86C11.8978 7.86 13.2096 6.54819 13.2096 4.93C13.2096 3.31181 11.8978 2 10.2796 2C8.66141 2 7.34961 3.31181 7.34961 4.93C7.34961 6.54819 8.66141 7.86 10.2796 7.86Z" fill="#ffffff"></path> <path d="M16.94 9.02844C18.2876 9.02844 19.38 7.93601 19.38 6.58844C19.38 5.24086 18.2876 4.14844 16.94 4.14844C15.5924 4.14844 14.5 5.24086 14.5 6.58844C14.5 7.93601 15.5924 9.02844 16.94 9.02844Z" fill="#ffffff"></path> <path d="M20.5496 12.9313C21.6266 12.9313 22.4996 12.0582 22.4996 10.9812C22.4996 9.90429 21.6266 9.03125 20.5496 9.03125C19.4727 9.03125 18.5996 9.90429 18.5996 10.9812C18.5996 12.0582 19.4727 12.9313 20.5496 12.9313Z" fill="#ffffff"></path> <path d="M3.94 10.9816C5.28757 10.9816 6.38 9.88914 6.38 8.54156C6.38 7.19399 5.28757 6.10156 3.94 6.10156C2.59243 6.10156 1.5 7.19399 1.5 8.54156C1.5 9.88914 2.59243 10.9816 3.94 10.9816Z" fill="#ffffff"></path> </g></svg>
+                        <small className="text-p font-rubik leading-none">Pets</small>
+                      </div>
+                    }
+                    {detailVenue?.meta?.breakfast &&
+                      <div className="flex gap-2 items-end">
+                        <svg
+                          className="w-6"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"><path d="M6 2C5.45 2 5 2.45 5 3V11C5 12.1 5.9 13 7 13V22H9V13C10.1 13 11 12.1 11 11V3C11 2.45 10.55 2 10 2C9.45 2 9 2.45 9 3V8H8V3C8 2.45 7.55 2 7 2C6.45 2 6 2.45 6 3V8H5V3C5 2.45 4.55 2 4 2Z" fill="#ffffff"
+                          /><path d="M14 2C13.45 2 13 2.45 13 3V12C13 13.1 13.9 14 15 14V22H17V3C17 2.45 16.55 2 16 2H14Z" fill="#ffffff"
+                          />
+                        </svg>
+                        <small className="text-p font-rubik leading-none">Breakfast</small>
+                      </div>
+                    }
+                    {detailVenue?.meta?.parking &&
+                      <div className="flex gap-2">
+                        <svg
+                          className="w-6 h-6 block"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"><path d="M6 2H14C17.31 2 20 4.69 20 8C20 11.31 17.31 14 14 14H10V22H6V2Z" fill="currentColor"
+                          /><path d="M10 6V10H14C15.1 10 16 9.1 16 8C16 6.9 15.1 6 14 6H10Z" fill="white"
+                          />
+                        </svg>
+                        <label htmlFor="parking">Parking</label>
+                      </div>
+                    }
+                  </div>
+
+                </div>
               </div>
-
-              <div className="bg-primary-blue text-white p-8 rounded-xl">
-                <h2 className="text-h2 font-poppins">Description</h2>
-                <p className="text-p font-rubik">
-                  "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt"
-                </p>
-                <div className="grid grid-cols-1 md:grid-cols-2  lg:grid-cols-4 gap-5 my-5">
-                  <div className="flex gap-2">
-                    <input className="cursor-pointer w-4" type="checkbox"
-                      name="test" />
-                    <label htmlFor="wifi">Wifi</label>
+              <div className="bg-primary-blue text-white p-8 rounded-xl w-full md:max-w-96 md:ml-auto mt-10 md:px-10">
+                <h2 className="text-h2 font-poppins text-center">Book this venue</h2>
+                <form className="w-full flex flex-col justify-center items-center" onSubmit={bookNow}>
+                  <div className="form-group my-3 w-full max-w-72 flex flex-col gap-2">
+                    <label className="text-p font-rubik" htmlFor="checkIn">Check-in:</label>
+                    <input
+                      className="bg-white text-black w-full max-w-72 h-8 rounded-xl px-3 cursor-pointer"
+                      id="checkIn"
+                      type="date"
+                      value={checkInDate}
+                      onChange={(e) => setCheckInDate(e.target.value)}
+                    />
+                    {errors.checkIn && <small className="text-color-600 bg-red-200 py-2 px-2 border-red-500 border text-black">{errors.checkIn}</small>}
                   </div>
-                  <div className="flex gap-2">
-                    <input className="cursor-pointer w-4" type="checkbox"
-                      name="test" />
-                    <label htmlFor="pets">Pets</label>
+                  <div className="form-group my-3 w-full max-w-72 flex flex-col gap-2">
+                    <label className="text-p font-rubik" htmlFor="checkOut">Check-out:</label>
+                    <input
+                      className="bg-white text-black w-full max-w-72 h-8 rounded-xl px-3 cursor-pointer"
+                      id="checkOut"
+                      type="date"
+                      value={checkOutDate}
+                      onChange={(e) => setCheckOutDate(e.target.value)}
+                    />
+                    {errors.checkOut && <small className="text-color-600 bg-red-200 py-2 px-2 border-red-500 border text-black">{errors.checkOut}</small>}
                   </div>
-                  <div className="flex gap-2">
-                    <input className="cursor-pointer w-4" type="checkbox"
-                      name="test" />
-                    <label htmlFor="breakfast">Breakfast</label>
+                  <div className="form-group my-3 w-full max-w-72 flex flex-col gap-2">
+                    <label className="text-p font-rubik" htmlFor="amountOfGuests">Number of guests:</label>
+                    <input
+                      className="bg-white text-black w-full max-w-72 h-8 rounded-xl px-3 cursor-pointer"
+                      id="amountOfGuests"
+                      type="number"
+                      value={numberOfGuests}
+                      onChange={(e) => setNumberOfGuests(e.target.value)}
+                    />
+                    {errors.guests && <small className="text-color-600 bg-red-200 py-2 px-2 border-red-500 border text-black">{errors.guests}</small>}
                   </div>
-                  <div className="flex gap-2">
-                    <input className="cursor-pointer w-4" type="checkbox"
-                      name="test" />
-                    <label htmlFor="parking">Parking</label>
+                  <div className="text-center my-3">
+                    <p className="text-p font-rubik"><span>{amountOfNights}</span> nights</p>
+                    <p className="text-p font-rubik">Total Price: <span> ${detailVenue.price && amountOfNights
+                      ? detailVenue.price * amountOfNights
+                      : 0}</span></p>
                   </div>
-                </div>
-                <div className="flex items-center gap-5">
-                  <img className="w-15 h-15 rounded-full object-cover" src="https://blocks.astratic.com/img/general-img-landscape.png" alt="test" />
-                  <h3>Owner</h3>
-                </div>
-
+                  <button className="cursor-pointer bg-green-700  h-10 text-white mx-10 w-full rounded-xl max-w-48 font-poppins text-p hover:bg-green-600 transition-colors" type="submit">Book now</button>
+                  {errors.dates && <small className="text-color-600 bg-red-200 py-2 px-2 mt-5 border-red-500 border text-black">{errors.dates}</small>}
+                  {errors.general && <small className="text-color-600 bg-red-200 py-2 px-2 mt-5 border-red-500 border text-black">{errors.general}</small>}
+                  {catchErrorCheck && <small className="text-color-600 bg-red-200 py-2 px-2 mt-5 border-red-500 border text-black">{catchError}</small>}
+                  {booking && <small className="mx-10 py-3 text-color-600 bg-green-200 px-2 my-4 border-green-500 border text-black">Booking successful!</small>}
+                </form>
               </div>
-            </div>
-
-            <div className="bg-primary-blue text-white p-8 rounded-xl w-full md:max-w-96 md:ml-auto mt-10 md:px-10">
-              <h2 className="text-h2 font-poppins text-center">Book this venue</h2>
-              <form className="w-full flex flex-col justify-center items-center" action="#">
-                <div className="form-group my-3 w-full max-w-72 flex flex-col gap-2">
-                  <label className="text-p font-rubik" htmlFor="checkIn">Check-in:</label>
-                  <input className="bg-white text-black w-full max-w-72 h-8 rounded-xl px-3 cursor-pointer" id="checkIn" type="date" />
-                </div>
-                <div className="form-group my-3 w-full max-w-72 flex flex-col gap-2">
-                  <label className="text-p font-rubik" htmlFor="checkOut">Check-out:</label>
-                  <input className="bg-white text-black w-full max-w-72 h-8 rounded-xl px-3 cursor-pointer" id="checkOut" type="date" />
-                </div>
-                <div className="form-group my-3 w-full max-w-72 flex flex-col gap-2">
-                  <label className="text-p font-rubik" htmlFor="amountOfGuests">Number of guests:</label>
-                  <input className="bg-white text-black w-full max-w-72 h-8 rounded-xl px-3 cursor-pointer" id="amountOfGuests" type="number" />
-                </div>
-                <div className="text-center my-3">
-                  <p className="text-p font-rubik"><span>0</span> Nights</p>
-                  <p className="text-p font-rubik">Total Price: <span>$200</span></p>
-                </div>
-                <button className="cursor-pointer bg-green-700  h-10 text-white mx-10 w-full rounded-xl max-w-48 font-poppins text-p hover:bg-green-600 transition-colors" type="submit">Book now</button>
-              </form>
             </div>
           </div>
         </div>
-      </div>
-    </div>
-
+      </div >
+    </>
   )
 }
 
