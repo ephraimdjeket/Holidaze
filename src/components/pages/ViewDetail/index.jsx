@@ -1,13 +1,13 @@
 import { API_BASE, HOLIDAZE_VENUES, CREATE_BOOKING } from "../../../api/config.mjs";
 import { useParams, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
+
 const ViewDetail = ({ viewImage, setViewImage }) => {
   const [detailVenue, setDetailVenue] = useState({});
   const [currentImage, setCurrentImage] = useState("");
   const [checkInDate, setCheckInDate] = useState("");
   const [checkOutDate, setCheckOutDate] = useState("");
   const [numberOfGuests, setNumberOfGuests] = useState("");
-  const [amountOfNights, setAmountOfNights] = useState(null);
   const [booking, setBooking] = useState(false);
 
   const [errors, setErrors] = useState({});
@@ -27,56 +27,21 @@ const ViewDetail = ({ viewImage, setViewImage }) => {
       } catch (error) {
         setCatchErrorCheck(true);
         setCatchError(error.message);
-      } finally {
-        console.log("done");
       }
     }
     fetchVenues();
   }, [id]);
 
-  async function bookNow(e) {
-    e.preventDefault();
-
-    setErrors({});
-    setCatchError("");
-    setCatchErrorCheck(false);
-
-    const errorData = {};
-
-    if (!checkInDate) errorData.checkIn = "Check-in date is required";
-    if (!checkOutDate) errorData.checkOut = "Check-out date is required";
-    if (!numberOfGuests || numberOfGuests < 1) {
-      errorData.guests = "At least 1 guest is required";
-    }
-    if (!amountOfNights || amountOfNights <= 0) {
-      errorData.dates = "Check-out must be after check-in";
-    }
-
-    if (Object.keys(errorData).length > 0) {
-      setErrors(errorData);
-      return;
-    }
-
-    const token = localStorage.getItem("token");
-
-    const bookingData = {
-      dateFrom: checkInDate,
-      dateTo: checkOutDate,
-      guests: Number(numberOfGuests),
-      venueId: id,
-    };
-  }
-
-  useEffect(() => {
-    if (!checkInDate || !checkOutDate) return;
+  const amountOfNights = (() => {
+    if (!checkInDate || !checkOutDate) return 0;
 
     const checkIn = new Date(checkInDate);
     const checkOut = new Date(checkOutDate);
     const diffTime = checkOut - checkIn;
     const diffDays = diffTime / (1000 * 60 * 60 * 24);
 
-    setAmountOfNights(diffDays > 0 ? diffDays : 0);
-  }, [checkInDate, checkOutDate]);
+    return diffDays > 0 ? diffDays : 0;
+  })();
 
   useEffect(() => {
     document.body.style.overflow = viewImage ? "hidden" : "auto";
@@ -93,8 +58,10 @@ const ViewDetail = ({ viewImage, setViewImage }) => {
 
     if (!checkInDate) errorData.checkIn = "Check-in date is required";
     if (!checkOutDate) errorData.checkOut = "Check-out date is required";
-    if (!numberOfGuests || numberOfGuests < 1) errorData.guests = "At least 1 guest is required";
-    if (!amountOfNights || amountOfNights <= 0) errorData.dates = "Check-out must be after check-in";
+    if (!numberOfGuests || numberOfGuests < 1)
+      errorData.guests = "At least 1 guest is required";
+    if (!amountOfNights || amountOfNights <= 0)
+      errorData.dates = "Check-out must be after check-in";
 
     if (Object.keys(errorData).length > 0) {
       setErrors(errorData);
@@ -107,12 +74,11 @@ const ViewDetail = ({ viewImage, setViewImage }) => {
     const bookingData = {
       dateFrom: checkInDate,
       dateTo: checkOutDate,
-      guests: Number(numberOfGuests),
+      guests: numberOfGuests,
       venueId: id,
     };
 
     try {
-
       const res = await fetch(`${API_BASE}${CREATE_BOOKING}`, {
         method: "POST",
         headers: {
@@ -139,7 +105,7 @@ const ViewDetail = ({ viewImage, setViewImage }) => {
       setCatchErrorCheck(true);
       setCatchError(error.message);
     }
-  };
+  }
 
   return (
     <>
@@ -180,12 +146,18 @@ const ViewDetail = ({ viewImage, setViewImage }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-0 md:gap-10">
               <div className="flex flex-col justify-between">
                 <div className="flex flex-wrap flex-col md:flex-row gap-10 my-10  justify-center items-center md:justify-start md:items-start">
-                  {detailVenue.media?.map(image => {
-                    return <img key={image.url} onClick={() => {
-                      setCurrentImage(image);
-                      setViewImage(true);
-                    }} className="h-35 w-35 border rounded-xl cursor-pointer hover:scale-110 ease-out duration-500 hover:blur-none" src={image.url} alt={image.alt} />
-                  })}
+                  {detailVenue.media?.slice(0, 3).map((image) => (
+                    <img
+                      key={image.url}
+                      onClick={() => {
+                        setCurrentImage(image);
+                        setViewImage(true);
+                      }}
+                      className="h-35 w-35 border rounded-xl cursor-pointer hover:scale-110 ease-out duration-500 hover:blur-none"
+                      src={image.url}
+                      alt={image.alt}
+                    />
+                  ))}
                 </div>
 
                 <div className="flex flex-col justify-top bg-primary-blue text-white p-8 rounded-xl h-full">
@@ -268,7 +240,7 @@ const ViewDetail = ({ viewImage, setViewImage }) => {
                       id="amountOfGuests"
                       type="number"
                       value={numberOfGuests}
-                      onChange={(e) => setNumberOfGuests(e.target.value)}
+                      onChange={(e) => setNumberOfGuests(Number(e.target.value))}
                     />
                     {errors.guests && <small className="text-color-600 bg-red-200 py-2 px-2 border-red-500 border text-black">{errors.guests}</small>}
                   </div>
