@@ -1,66 +1,77 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { API_BASE, UPDATE_PROFILE } from "../../../../api/config.mjs";
+import { UseAuth } from "../../../context/AuthContext";
 
-const ProfileModal = ({ openModal, closeModal, userName }) => {
+const ProfileModal = ({ openModal, closeModal, userName, venueManager }) => {
   const [avatarURL, setAvatarUrl] = useState("");
   const [bannerUrl, setBannerUrl] = useState("");
   const [bio, setBio] = useState("");
   const [error, setError] = useState("");
+  const [isVenueManager, setIsVenueManager] = useState(false);
+
+  const { setUser } = UseAuth();
 
   const accessToken = localStorage.getItem("accessToken");
   const apiKey = localStorage.getItem("apiKey");
+
+  useEffect(() => {
+    if (openModal) {
+      setIsVenueManager(venueManager);
+    }
+  }, [openModal, venueManager]);
 
   async function updateAvatar(e) {
     e.preventDefault();
     setError("");
 
     const body = {
-      avatar: {
-        url: avatarURL,
-        alt: "Profile avatar",
-      },
-      banner: {
-        url: bannerUrl,
-        alt: "Profile banner",
-      },
+      avatar: { url: avatarURL, alt: "Profile avatar" },
+      banner: { url: bannerUrl, alt: "Profile banner" },
       bio,
+      venueManager: isVenueManager,
     };
 
     try {
-      const res = await fetch(API_BASE + UPDATE_PROFILE + `/${userName}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-          "X-Noroff-API-Key": apiKey,
-        },
-        body: JSON.stringify(body),
-      });
+      const res = await fetch(
+        API_BASE + UPDATE_PROFILE + `/${userName}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+            "X-Noroff-API-Key": apiKey,
+          },
+          body: JSON.stringify(body),
+        }
+      );
 
       if (!res.ok) {
         const data = await res.json();
         throw new Error(data.errors?.[0]?.message || "Failed to update profile");
       }
 
+      const profileRes = await fetch(
+        `${API_BASE}${UPDATE_PROFILE}/${userName}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "X-Noroff-API-Key": apiKey,
+          },
+        }
+      );
+
+      const profileData = await profileRes.json();
       const storedUser = JSON.parse(localStorage.getItem("user"));
 
       const updatedUser = {
         ...storedUser,
-        bio,
-        avatar: {
-          url: avatarURL,
-          alt: "Profile avatar",
-        },
-        banner: {
-          url: bannerUrl,
-          alt: "Profile banner",
-        },
+        ...profileData.data,
       };
 
       localStorage.setItem("user", JSON.stringify(updatedUser));
-      closeModal(false);
-      window.location.reload();
+      setUser(updatedUser);
 
+      closeModal(false);
     } catch (err) {
       setError(err.message);
     }
@@ -117,6 +128,22 @@ const ProfileModal = ({ openModal, closeModal, userName }) => {
             onChange={(e) => setBio(e.target.value)}
             required
           />
+        </div>
+
+        <div className="py-3 flex items-center gap-2">
+          <input
+            id="venueManager"
+            type="checkbox"
+            className="w-5 h-5 cursor-pointer"
+            checked={isVenueManager}
+            onChange={(e) => setIsVenueManager(e.target.checked)}
+          />
+          <label
+            htmlFor="venueManager"
+            className="text-md font-rubik cursor-pointer select-none"
+          >
+            Register as a venue manager
+          </label>
         </div>
 
         {error && (
