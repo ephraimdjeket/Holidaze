@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { API_BASE, AUTH_LOGIN } from "../../../api/config.mjs";
+import { API_BASE, AUTH_LOGIN, UPDATE_PROFILE } from "../../../api/config.mjs";
 import { Link, useNavigate } from "react-router-dom";
 import Loader from "../../ui/Loader";
 import { UseAuth } from "../../context/AuthContext";
@@ -12,60 +12,79 @@ const Login = () => {
   const [catchError, setCatchError] = useState("");
   const [catchErrorCheck, setCatchErrorCheck] = useState(false);
 
-  const { setUser, setIsLoggedIn } = UseAuth();
+  const { setUser } = UseAuth();
   const navigate = useNavigate();
 
   async function handleSubmit(e) {
     e.preventDefault();
     setLoading(true);
-    setCatchErrorCheck(false);
     setErrors({});
+    setCatchErrorCheck(false);
+
+    localStorage.removeItem("user");
+    localStorage.removeItem("accessToken");
 
     try {
       const res = await fetch(API_BASE + AUTH_LOGIN, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ email, password }),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
         const errorData = {};
-        data.errors?.forEach(error => {
-          const field = error.path?.[0] || "general";
-          errorData[field] = error.message;
+        data.errors?.forEach(err => {
+          const field = err.path?.[0] || "general";
+          errorData[field] = err.message;
         });
         setErrors(errorData);
+        setLoading(false);
         return;
       }
 
-      setUser(data.data);
-      setIsLoggedIn(true);
-
-      localStorage.setItem("user", JSON.stringify(data.data));
-      localStorage.setItem("accessToken", data.data.accessToken);
-
       const token = data.data.accessToken;
+      const name = data.data.name;
+
+      localStorage.setItem("accessToken", token);
 
       if (!localStorage.getItem("apiKey")) {
         const keyRes = await fetch(`${API_BASE}auth/create-api-key`, {
           method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
           },
-          body: JSON.stringify({ name: "Holidaze App Key" })
+          body: JSON.stringify({ name: "Holidaze App Key" }),
         });
 
         const keyData = await keyRes.json();
-
-        if (!keyRes.ok) {
-          throw new Error("Failed to create API key");
-        }
-
         localStorage.setItem("apiKey", keyData.data.key);
       }
+
+      const profileRes = await fetch(
+        `${API_BASE}${UPDATE_PROFILE}/${name}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "X-Noroff-API-Key": localStorage.getItem("apiKey"),
+          },
+        }
+      );
+
+      const profileData = await profileRes.json();
+
+      const user = {
+        name: data.data.name,
+        email: data.data.email,
+        venueManager: profileData.data.venueManager,
+        avatar: profileData.data.avatar,
+        banner: profileData.data.banner,
+      };
+
+      localStorage.setItem("user", JSON.stringify(user));
+      setUser(user);
 
       navigate("/home");
     } catch (error) {
@@ -77,7 +96,7 @@ const Login = () => {
   }
 
   return (
-    <div className={`max-w-md mx-auto py-24 min-h-[88.6vh] ${loading && "flex flex-col justify-center items-center"}`}>
+    <div className={`max-w-md mx-auto py-24 min-h-[88.6vh] ${loading && "flex justify-center items-center"}`}>
       {loading ? (
         <Loader />
       ) : (
@@ -86,50 +105,44 @@ const Login = () => {
             Welcome to Holidaze - Login
           </h1>
 
-          <form onSubmit={handleSubmit} className="bg-light-grey border rounded-xl mx-10 py-8 flex flex-col justify-center">
+          <form
+            onSubmit={handleSubmit}
+            className="bg-light-grey border rounded-xl mx-10 py-8 flex flex-col"
+          >
             <div className="mx-10 py-3 flex flex-col gap-1">
-              <label className="text-1xl">Email</label>
+              <label>Email</label>
               <input
                 className="bg-white w-full border h-7 pl-2 py-4"
-                type="text"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
-              {errors.email && (
-                <small className="text-color-600 bg-red-200 py-2 px-2 my-2 border-red-500 border">
-                  {errors.email}
-                </small>
-              )}
+              {errors.email && <small className="bg-red-200 p-2">{errors.email}</small>}
             </div>
 
             <div className="mx-10 py-3 flex flex-col gap-1">
-              <label className="text-1xl">Password</label>
+              <label>Password</label>
               <input
                 className="bg-white w-full border h-7 pl-2 py-4"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
-              {errors.general && (
-                <small className="text-color-600 bg-red-200 py-2 px-2 my-2 border-red-500 border">
-                  {errors.general}
-                </small>
-              )}
+              {errors.general && <small className="bg-red-200 p-2">{errors.general}</small>}
             </div>
 
-            <button className="cursor-pointer bg-green-600 h-10 text-white mx-10">
+            <button className="bg-green-600 h-10 text-white mx-10 mt-4 cursor-pointer">
               Login
             </button>
 
-            <p className="text-center text-1xl py-3 flex flex-col">
+            <p className="text-center py-3">
               Don’t have an account?
-              <Link to="/register" className="cursor-pointer text-accent-aqua font-bold">
+              <Link to="/register" className="text-accent-aqua font-bold block">
                 Register here
               </Link>
             </p>
 
             {catchErrorCheck && (
-              <small className="text-color-600 bg-red-200 py-2 px-2 my-2 border-red-500 border text-center mx-10">
+              <small className="bg-red-200 p-2 mx-10 text-center">
                 {catchError}
               </small>
             )}
