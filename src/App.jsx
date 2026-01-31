@@ -8,7 +8,7 @@ import Contact from "./components/pages/Contact";
 import Profile from "./components/pages/Profile";
 import VenueDashboard from "./components/pages/VenueDashboard";
 import ViewDetail from "./components/pages/ViewDetail";
-import Pagenotfound from "./components/pages/PageNotFound";
+import Pagenotfound from "./components/pages/Pagenotfound";
 import Layout from "./components/Layout";
 import { UseAuth } from "./components/context/AuthContext";
 
