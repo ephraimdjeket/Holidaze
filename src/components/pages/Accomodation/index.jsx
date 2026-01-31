@@ -41,14 +41,14 @@ const Accomodation = () => {
         <input type="text"
           value={search}
           onChange={(e) => { setSearch(e.target.value) }}
-          className="w-full h-9 bg-white rounded-xl outline-none pl-3 max-w-88" />
+          className="w-full h-9 bg-white rounded-xl outline-none pl-3 max-w-90" />
       </div>
       {loader ? (
         <div className="flex justify-center items-center mx-auto h-[45vh]">
           <Loader />
         </div>
       ) : (
-        <div className="grid mx-auto justify-center sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 place-items-center max-w-7xl">
+        <div className="grid mx-auto justify-center md:grid-cols-2 lg:grid-cols-3 place-items-center max-w-7xl gap-10">
           {filteredVenues.length === 0 ? (
             <h3 className="flex items-center text-h3 font-poppins mx-auto h-[45vh] col-span-full text-center">No venues found</h3>
           ) : (

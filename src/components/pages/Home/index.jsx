@@ -41,7 +41,7 @@ const Home = () => {
             <p className="font-rubik text-body lg:text-2xl my-2 lg:my-4">
               Book your next accommodation here at affordable prices
             </p>
-            <Link to="/accomodations" className="bg-primary-blue px-8 py-3 rounded-2xl font-bold cursor-pointer font-poppins w-full max-w-62">
+            <Link to="/accomodations" className="bg-primary-blue px-8 py-3 rounded-2xl font-bold cursor-pointer font-poppins w-full max-w-60">
               Book now
             </Link>
           </div>
@@ -70,7 +70,7 @@ const Home = () => {
         {loading ? (
           <Loader />
         ) : (
-          <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 w-full max-w-7xl place-items-center">
+          <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-3 w-full max-w-7xl place-items-center">
             {venues.map((venue) => (
               <Card key={venue.id} venueDetails={venue} />
             ))}
